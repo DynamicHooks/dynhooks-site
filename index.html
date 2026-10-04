@@ -52,7 +52,7 @@ code,.mono{font-family:var(--mono)}
 .btn-primary:hover{box-shadow:0 12px 40px -6px rgba(192,64,208,.9),inset 0 1px 0 rgba(255,255,255,.3);transform:translateY(-2px)}
 .btn-ghost{border-color:var(--line2);color:var(--text);background:rgba(255,255,255,.03)}
 .btn-ghost:hover{border-color:var(--pink);background:rgba(192,64,208,.1)}
-.btn svg{width:18px;height:18px}
+
 
 /* nav */
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);background:rgba(6,3,11,.66);border-bottom:1px solid var(--line)}
@@ -63,7 +63,14 @@ code,.mono{font-family:var(--mono)}
 .links{display:flex;gap:26px;margin-left:auto;font-size:15px}
 .links a{text-decoration:none;color:var(--muted);padding:12px 0;transition:color .2s}
 .links a:hover{color:var(--text)}
-.nav .btn{min-height:42px;padding:0 20px;font-size:14.5px}
+.nav .btn{min-height:42px;padding:0 18px;font-size:14.5px}
+[hidden]{display:none!important}
+.social{display:flex;align-items:center;gap:8px}
+.social a{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line2);background:rgba(255,255,255,.03);transition:color .25s,border-color .25s,background .25s,transform .3s var(--ease),box-shadow .3s}
+.social a:hover{color:#fff;border-color:var(--pink);background:rgba(192,64,208,.16);transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(192,64,208,.9)}
+.social svg,.btn svg{width:17px;height:17px;fill:currentColor}
+.btn svg[fill=none]{fill:none}
+.social.sm{display:none}
 .burger{display:none;margin-left:auto;width:46px;height:46px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--text);cursor:pointer;align-items:center;justify-content:center}
 
 /* hero */
@@ -326,11 +333,16 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
 .js .rv{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .js .rv.in{opacity:1;transform:none}
 
-@media (max-width:980px){
-  .links,.nav .btn{display:none}
+@media (max-width:1140px){
+  .links,.nav .btn,.nav .wrap>.social{display:none}
   .burger{display:inline-flex}
-  .nav.open .links{display:flex;position:absolute;left:0;right:0;top:68px;flex-direction:column;gap:0;padding:10px 20px 20px;background:rgba(6,3,11,.97);border-bottom:1px solid var(--line)}
-  .nav.open .links a{padding:15px 0;border-bottom:1px solid var(--line);font-size:17px;color:var(--text)}
+  .nav.open .links{display:flex;position:absolute;left:0;right:0;top:68px;flex-direction:column;gap:0;padding:10px 20px 22px;background:#06030B;border-bottom:1px solid var(--line2);box-shadow:0 30px 60px -20px #000}
+  .nav.open .links>a{padding:15px 0;border-bottom:1px solid var(--line);font-size:17px;color:var(--text)}
+  .nav.open .links>a::after{display:none}
+  .nav.open .social.sm{display:flex;gap:12px;padding-top:18px}
+  .social.sm a{width:48px;height:48px}
+}
+@media (max-width:980px){
   .hero{padding-top:118px}
   .hero-grid{grid-template-columns:1fr;gap:10px}
   .stage{max-width:400px;margin-top:26px}
@@ -371,10 +383,12 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
       <a href="#rules">Programs</a>
       <a href="#limits">Hard limits</a>
       <a href="#token">$DHOOKS</a>
-      <a href="#next">What comes next</a>
+      <a href="#next">Roadmap</a>
       <a href="#faq">FAQ</a>
+      <div class="social sm"><a href="https://x.com/DynamicHooks" target="_blank" rel="noopener" aria-label="Dynamic Hooks on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a><a href="#" target="_blank" rel="noopener" aria-label="Dynamic Hooks on Telegram" data-tg-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a><a href="https://docs.dynamichooks.com/" target="_blank" rel="noopener" aria-label="Dynamic Hooks docs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.513 1.097c-.645 0-1.233.34-2.407 1.017L3.675 5.82A7.233 7.233 0 0 0 0 12.063v.236a7.233 7.233 0 0 0 3.667 6.238L7.69 20.86c2.354 1.36 3.531 2.042 4.824 2.042 1.292.001 2.47-.678 4.825-2.038l4.251-2.453c1.177-.68 1.764-1.02 2.087-1.579.323-.56.324-1.24.323-2.6v-2.63a1.04 1.04 0 0 0-1.558-.903l-8.728 5.024c-.587.337-.88.507-1.201.507-.323 0-.616-.168-1.204-.506l-5.904-3.393c-.297-.171-.446-.256-.565-.271a.603.603 0 0 0-.634.368c-.045.111-.045.282-.043.625.002.252 0 .378.025.494.053.259.189.493.387.667.089.077.198.14.416.266l6.315 3.65c.589.34.884.51 1.207.51.324 0 .617-.17 1.206-.509l7.74-4.469c.202-.116.302-.172.377-.13.075.044.075.16.075.392v1.193c0 .34.001.51-.08.649-.08.14-.227.224-.522.394l-6.382 3.685c-1.178.68-1.767 1.02-2.413 1.02-.646 0-1.236-.34-2.412-1.022l-5.97-3.452-.043-.025a4.106 4.106 0 0 1-2.031-3.52V11.7c0-.801.427-1.541 1.12-1.944a1.979 1.979 0 0 1 1.982-.001l4.946 2.858c1.174.679 1.762 1.019 2.407 1.02.645 0 1.233-.34 2.41-1.017l7.482-4.306a1.091 1.091 0 0 0 0-1.891L14.92 2.11c-1.175-.675-1.762-1.013-2.406-1.013Z"/></svg></a></div>
     </nav>
-    <a class="btn btn-primary" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+    <div class="social"><a href="https://x.com/DynamicHooks" target="_blank" rel="noopener" aria-label="Dynamic Hooks on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a><a href="#" target="_blank" rel="noopener" aria-label="Dynamic Hooks on Telegram" data-tg-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a><a href="https://docs.dynamichooks.com/" target="_blank" rel="noopener" aria-label="Dynamic Hooks docs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.513 1.097c-.645 0-1.233.34-2.407 1.017L3.675 5.82A7.233 7.233 0 0 0 0 12.063v.236a7.233 7.233 0 0 0 3.667 6.238L7.69 20.86c2.354 1.36 3.531 2.042 4.824 2.042 1.292.001 2.47-.678 4.825-2.038l4.251-2.453c1.177-.68 1.764-1.02 2.087-1.579.323-.56.324-1.24.323-2.6v-2.63a1.04 1.04 0 0 0-1.558-.903l-8.728 5.024c-.587.337-.88.507-1.201.507-.323 0-.616-.168-1.204-.506l-5.904-3.393c-.297-.171-.446-.256-.565-.271a.603.603 0 0 0-.634.368c-.045.111-.045.282-.043.625.002.252 0 .378.025.494.053.259.189.493.387.667.089.077.198.14.416.266l6.315 3.65c.589.34.884.51 1.207.51.324 0 .617-.17 1.206-.509l7.74-4.469c.202-.116.302-.172.377-.13.075.044.075.16.075.392v1.193c0 .34.001.51-.08.649-.08.14-.227.224-.522.394l-6.382 3.685c-1.178.68-1.767 1.02-2.413 1.02-.646 0-1.236-.34-2.412-1.022l-5.97-3.452-.043-.025a4.106 4.106 0 0 1-2.031-3.52V11.7c0-.801.427-1.541 1.12-1.944a1.979 1.979 0 0 1 1.982-.001l4.946 2.858c1.174.679 1.762 1.019 2.407 1.02.645 0 1.233-.34 2.41-1.017l7.482-4.306a1.091 1.091 0 0 0 0-1.891L14.92 2.11c-1.175-.675-1.762-1.013-2.406-1.013Z"/></svg></a></div>
+    <a class="btn btn-primary" href="https://x.com/DynamicHooks" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>Follow on X</a>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
@@ -396,7 +410,8 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
         <div class="cta">
           <a class="btn btn-primary" href="#react">Watch a market react
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="btn btn-ghost" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+          <a class="btn btn-ghost" href="https://docs.dynamichooks.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.513 1.097c-.645 0-1.233.34-2.407 1.017L3.675 5.82A7.233 7.233 0 0 0 0 12.063v.236a7.233 7.233 0 0 0 3.667 6.238L7.69 20.86c2.354 1.36 3.531 2.042 4.824 2.042 1.292.001 2.47-.678 4.825-2.038l4.251-2.453c1.177-.68 1.764-1.02 2.087-1.579.323-.56.324-1.24.323-2.6v-2.63a1.04 1.04 0 0 0-1.558-.903l-8.728 5.024c-.587.337-.88.507-1.201.507-.323 0-.616-.168-1.204-.506l-5.904-3.393c-.297-.171-.446-.256-.565-.271a.603.603 0 0 0-.634.368c-.045.111-.045.282-.043.625.002.252 0 .378.025.494.053.259.189.493.387.667.089.077.198.14.416.266l6.315 3.65c.589.34.884.51 1.207.51.324 0 .617-.17 1.206-.509l7.74-4.469c.202-.116.302-.172.377-.13.075.044.075.16.075.392v1.193c0 .34.001.51-.08.649-.08.14-.227.224-.522.394l-6.382 3.685c-1.178.68-1.767 1.02-2.413 1.02-.646 0-1.236-.34-2.412-1.022l-5.97-3.452-.043-.025a4.106 4.106 0 0 1-2.031-3.52V11.7c0-.801.427-1.541 1.12-1.944a1.979 1.979 0 0 1 1.982-.001l4.946 2.858c1.174.679 1.762 1.019 2.407 1.02.645 0 1.233-.34 2.41-1.017l7.482-4.306a1.091 1.091 0 0 0 0-1.891L14.92 2.11c-1.175-.675-1.762-1.013-2.406-1.013Z"/></svg>Read the docs</a>
+          <a class="btn btn-ghost" href="https://x.com/DynamicHooks" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>Follow on X</a>
         </div>
         <div class="steps" aria-label="How it works in three steps"><span>Launch a market</span><i aria-hidden="true">→</i><span>Program its economics</span><i aria-hidden="true">→</i><span>Let it evolve on-chain</span></div>
       </div>
@@ -553,7 +568,7 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
         <div><span>Supply</span><b>1,000,000,000, fixed</b></div>
         <div><span>Mint function</span><b>None</b></div>
         <div><span>Chain</span><b>Robinhood Chain</b></div>
-        <div><span>Address</span><b><a href="https://dynamic-hooks.gitbook.io/docs/addresses" target="_blank" rel="noopener">Published on the Addresses page</a></b></div>
+        <div><span>Address</span><b><a href="https://docs.dynamichooks.com/addresses" target="_blank" rel="noopener">Published on the Addresses page</a></b></div>
       </div>
     </div>
     <div class="stack">
@@ -620,7 +635,7 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
     <span class="eyebrow">The full document</span>
     <h2>Rules belong in the <span class="grad">venue.</span></h2>
     <p>The docs explain what a market is here, how its program works, who gets paid, and what can and cannot change.</p>
-    <a class="btn btn-primary" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+    <div class="cta" style="justify-content:center;margin:0"><a class="btn btn-primary" href="https://docs.dynamichooks.com/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.513 1.097c-.645 0-1.233.34-2.407 1.017L3.675 5.82A7.233 7.233 0 0 0 0 12.063v.236a7.233 7.233 0 0 0 3.667 6.238L7.69 20.86c2.354 1.36 3.531 2.042 4.824 2.042 1.292.001 2.47-.678 4.825-2.038l4.251-2.453c1.177-.68 1.764-1.02 2.087-1.579.323-.56.324-1.24.323-2.6v-2.63a1.04 1.04 0 0 0-1.558-.903l-8.728 5.024c-.587.337-.88.507-1.201.507-.323 0-.616-.168-1.204-.506l-5.904-3.393c-.297-.171-.446-.256-.565-.271a.603.603 0 0 0-.634.368c-.045.111-.045.282-.043.625.002.252 0 .378.025.494.053.259.189.493.387.667.089.077.198.14.416.266l6.315 3.65c.589.34.884.51 1.207.51.324 0 .617-.17 1.206-.509l7.74-4.469c.202-.116.302-.172.377-.13.075.044.075.16.075.392v1.193c0 .34.001.51-.08.649-.08.14-.227.224-.522.394l-6.382 3.685c-1.178.68-1.767 1.02-2.413 1.02-.646 0-1.236-.34-2.412-1.022l-5.97-3.452-.043-.025a4.106 4.106 0 0 1-2.031-3.52V11.7c0-.801.427-1.541 1.12-1.944a1.979 1.979 0 0 1 1.982-.001l4.946 2.858c1.174.679 1.762 1.019 2.407 1.02.645 0 1.233-.34 2.41-1.017l7.482-4.306a1.091 1.091 0 0 0 0-1.891L14.92 2.11c-1.175-.675-1.762-1.013-2.406-1.013Z"/></svg>Read the docs</a><a class="btn btn-ghost" href="https://x.com/DynamicHooks" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>Follow on X</a></div>
   </div>
 </section>
 
@@ -631,12 +646,12 @@ footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);f
     <div class="foot">
       <a class="brand" href="#top"><img src="assets/hook-cut.png" alt="" width="34" height="34" loading="lazy">Dynamic Hooks</a>
       <nav aria-label="Footer">
-        <a href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Docs</a>
-        <a href="https://dynamic-hooks.gitbook.io/docs/programs-and-rules" target="_blank" rel="noopener">Programs and rules</a>
-        <a href="https://dynamic-hooks.gitbook.io/docs/straight-talk" target="_blank" rel="noopener">Straight talk</a>
-        <a href="https://dynamic-hooks.gitbook.io/docs/addresses" target="_blank" rel="noopener">Addresses</a>
-        <a href="https://x.com/DynamicHooks" target="_blank" rel="noopener" data-x-link>X @DynamicHooks</a>
-      </nav>
+        <a href="https://docs.dynamichooks.com/" target="_blank" rel="noopener">Docs</a>
+        <a href="https://docs.dynamichooks.com/programs-and-rules" target="_blank" rel="noopener">Programs and rules</a>
+        <a href="https://docs.dynamichooks.com/straight-talk" target="_blank" rel="noopener">Straight talk</a>
+        <a href="https://docs.dynamichooks.com/addresses" target="_blank" rel="noopener">Addresses</a>
+        </nav>
+      <div class="social foot-social"><a href="https://x.com/DynamicHooks" target="_blank" rel="noopener" aria-label="Dynamic Hooks on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a><a href="#" target="_blank" rel="noopener" aria-label="Dynamic Hooks on Telegram" data-tg-link hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a><a href="https://docs.dynamichooks.com/" target="_blank" rel="noopener" aria-label="Dynamic Hooks docs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.513 1.097c-.645 0-1.233.34-2.407 1.017L3.675 5.82A7.233 7.233 0 0 0 0 12.063v.236a7.233 7.233 0 0 0 3.667 6.238L7.69 20.86c2.354 1.36 3.531 2.042 4.824 2.042 1.292.001 2.47-.678 4.825-2.038l4.251-2.453c1.177-.68 1.764-1.02 2.087-1.579.323-.56.324-1.24.323-2.6v-2.63a1.04 1.04 0 0 0-1.558-.903l-8.728 5.024c-.587.337-.88.507-1.201.507-.323 0-.616-.168-1.204-.506l-5.904-3.393c-.297-.171-.446-.256-.565-.271a.603.603 0 0 0-.634.368c-.045.111-.045.282-.043.625.002.252 0 .378.025.494.053.259.189.493.387.667.089.077.198.14.416.266l6.315 3.65c.589.34.884.51 1.207.51.324 0 .617-.17 1.206-.509l7.74-4.469c.202-.116.302-.172.377-.13.075.044.075.16.075.392v1.193c0 .34.001.51-.08.649-.08.14-.227.224-.522.394l-6.382 3.685c-1.178.68-1.767 1.02-2.413 1.02-.646 0-1.236-.34-2.412-1.022l-5.97-3.452-.043-.025a4.106 4.106 0 0 1-2.031-3.52V11.7c0-.801.427-1.541 1.12-1.944a1.979 1.979 0 0 1 1.982-.001l4.946 2.858c1.174.679 1.762 1.019 2.407 1.02.645 0 1.233-.34 2.41-1.017l7.482-4.306a1.091 1.091 0 0 0 0-1.891L14.92 2.11c-1.175-.675-1.762-1.013-2.406-1.013Z"/></svg></a></div>
     </div>
     <p class="safe">No one from this project will ever message you first, ask for a seed phrase, or send a claim link. The only addresses that matter are on the Addresses page of the docs.</p>
   </div>
