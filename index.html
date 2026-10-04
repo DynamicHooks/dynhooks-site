@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamic Hooks — Markets that react.</title>
+<meta name="description" content="Dynamic Hooks is the programmable market layer on Robinhood Chain. Launch a market, program its economics, and let it evolve on-chain.">
+<meta name="theme-color" content="#06030B">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dynamic Hooks — Markets that react.">
+<meta property="og:description" content="The programmable market layer on Robinhood Chain. Launch a market. Program its economics. Let it evolve on-chain.">
+<meta property="og:url" content="https://dynamichooks.github.io/dynhooks-site/">
+<meta property="og:image" content="https://dynamichooks.github.io/dynhooks-site/assets/og.png">
+<meta name="twitter:image" content="https://dynamichooks.github.io/dynhooks-site/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon-64.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/hook.jpg">
+<style>
+:root{
+  --bg:#06030B; --bg2:#0B0514; --panel:rgba(255,255,255,.035); --panel2:rgba(75,42,122,.16);
+  --line:rgba(185,168,208,.16); --line2:rgba(185,168,208,.28);
+  --text:#EFE9F6; --muted:#B7A9CC; --dim:#8E80A6;
+  --violet:#8B5CF6; --magenta:#C040D0; --pink:#E9AEF3; --silver:#D8D4DC;
+  --paper:#F4F0F9; --ink:#170A26; --ink2:#4A3B60;
+  --ok:#7EE2B8;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --display:Montserrat,system-ui,sans-serif; --body:Inter,system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.08;letter-spacing:-.02em}
+p{margin:0}
+code,.mono{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--pink);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1180px,100% - 40px);margin-inline:auto}
+.eyebrow{display:inline-flex;align-items:center;gap:.8em;font:500 12.5px/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.eyebrow::before{content:"";width:.55em;height:.55em;border-radius:50%;background:var(--magenta);box-shadow:0 0 14px 2px rgba(192,64,208,.8)}
+.grad{font-style:italic;background:linear-gradient(90deg,#F0B8F6,#C040D0 55%,#8B5CF6);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.silver{background:linear-gradient(180deg,#fff,#E8E2EE 46%,#A397B3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;min-height:48px;padding:0 24px;border-radius:999px;font:600 15.5px/1 var(--body);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s,border-color .25s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#D25BE0,#8B5CF6);color:#fff;box-shadow:0 8px 30px -8px rgba(192,64,208,.7),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary:hover{box-shadow:0 12px 40px -6px rgba(192,64,208,.9),inset 0 1px 0 rgba(255,255,255,.3);transform:translateY(-2px)}
+.btn-ghost{border-color:var(--line2);color:var(--text);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:var(--pink);background:rgba(192,64,208,.1)}
+.btn svg{width:18px;height:18px}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);background:rgba(6,3,11,.66);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:68px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font:600 18px/1 var(--display);letter-spacing:-.01em}
+.brand img{width:36px;height:36px;border-radius:9px}
+.links{display:flex;gap:26px;margin-left:auto;font-size:15px}
+.links a{text-decoration:none;color:var(--muted);padding:12px 0;transition:color .2s}
+.links a:hover{color:var(--text)}
+.nav .btn{min-height:42px;padding:0 20px;font-size:14.5px}
+.burger{display:none;margin-left:auto;width:46px;height:46px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--text);cursor:pointer;align-items:center;justify-content:center}
+
+/* hero */
+.hero{position:relative;padding:150px 0 70px;overflow:hidden;isolation:isolate}
+.hero::before{content:"";position:absolute;z-index:-2;inset:0;background:
+  radial-gradient(900px 700px at 8% -10%,rgba(75,42,122,.55),transparent 65%),
+  radial-gradient(900px 800px at 82% 45%,rgba(192,64,208,.18),transparent 62%)}
+.hero::after{content:"";position:absolute;z-index:-1;inset:0;background-image:radial-gradient(rgba(185,168,208,.18) 1px,transparent 1.4px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 60% 70% at 30% 40%,#000,transparent);mask-image:radial-gradient(ellipse 60% 70% at 30% 40%,#000,transparent);opacity:.5}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:30px;align-items:center}
+.hero h1{font-size:clamp(46px,7.4vw,98px);font-weight:600;margin:22px 0 22px}
+.hero h1 .l1{display:block;font-weight:300;color:#DDD2EC}
+.lede{font-size:clamp(17px,1.5vw,20px);color:var(--muted);max-width:33em}
+.lede b{color:var(--text);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin:34px 0 34px}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:10px 9px;font:500 11.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase}
+.steps span{padding:10px 13px;white-space:nowrap;border-radius:999px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(75,42,122,.34),rgba(42,22,80,.2));color:#DDD2EE}
+.steps i{color:var(--magenta);font-style:normal}
+.stage{position:relative;aspect-ratio:1/1.02;max-width:560px;margin-inline:auto;width:100%}
+.stage img{position:absolute;left:50%;top:50%;width:112%;height:auto;max-width:none;transform:translate(-50%,-50%);mix-blend-mode:screen;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 4%,#000 88%,transparent 99%),linear-gradient(to right,transparent 0,#000 12%,#000 88%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent 0,#000 4%,#000 88%,transparent 99%),linear-gradient(to right,transparent 0,#000 12%,#000 88%,transparent 100%);mask-composite:intersect}
+.ring{position:absolute;left:50%;top:48%;border-radius:50%;border:1.5px solid rgba(192,64,208,.38);transform:translate(-50%,-50%);animation:pulse 5.5s var(--ease) infinite}
+.ring:nth-child(1){width:96%;aspect-ratio:1}
+.ring:nth-child(2){width:116%;aspect-ratio:1;animation-delay:.5s;border-color:rgba(192,64,208,.24)}
+.ring:nth-child(3){width:138%;aspect-ratio:1;animation-delay:1s;border-color:rgba(192,64,208,.13)}
+@keyframes pulse{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.035)}}
+.float{position:absolute;z-index:2;padding:12px 14px;border-radius:14px;border:1px solid var(--line2);background:rgba(14,7,24,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font:500 12px/1.45 var(--mono);color:#DDD2EE;box-shadow:0 18px 50px -18px #000;animation:bob 7s ease-in-out infinite}
+.float b{display:flex;align-items:center;gap:7px;font-weight:500;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:5px}
+.float b::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.float .k{color:var(--pink)}
+.f1{left:-4%;bottom:15%}.f1 b{color:var(--ok)}
+.f2{right:-3%;top:11%;animation-delay:-3.5s}.f2 b{color:var(--pink)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:64px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--line)}
+.facts div{background:rgba(9,4,16,.9);padding:22px 22px}
+.facts strong{display:block;font:600 17px/1.25 var(--display);margin-bottom:6px}
+.facts span{font-size:14px;color:var(--muted);line-height:1.5;display:block}
+
+/* sections */
+section{position:relative;padding:110px 0}
+.head{max-width:760px;margin-bottom:54px}
+.head h2{font-size:clamp(32px,4.4vw,56px);font-weight:600;margin:18px 0 18px}
+.head p{color:var(--muted);font-size:18.5px}
+.alt{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.paper{background:var(--paper);color:var(--ink)}
+.paper .eyebrow{color:var(--ink2)}
+.paper .head p{color:var(--ink2)}
+.paper .grad{background:linear-gradient(90deg,#9A2BB0,#6D3BD0);-webkit-background-clip:text;background-clip:text}
+.card{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:26px;transition:border-color .3s,transform .4s var(--ease),background .3s}
+.card:hover{border-color:var(--line2);background:rgba(255,255,255,.05)}
+.card h3{font-size:20px;font-weight:600;margin-bottom:10px;letter-spacing:-.01em}
+.card p{color:var(--muted);font-size:15.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.tag{display:inline-block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:7px 10px;border-radius:8px;background:rgba(192,64,208,.14);color:var(--pink);border:1px solid rgba(192,64,208,.3);margin-bottom:14px}
+.ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(192,64,208,.28),rgba(139,92,246,.18));border:1px solid rgba(192,64,208,.35);margin-bottom:18px;color:var(--pink)}
+.ico svg{width:22px;height:22px}
+
+/* simulator */
+.sim{border:1px solid var(--line2);border-radius:24px;background:linear-gradient(180deg,rgba(75,42,122,.2),rgba(12,6,22,.7));box-shadow:0 40px 120px -50px rgba(192,64,208,.5);overflow:hidden}
+.tabs{display:flex;gap:6px;padding:10px;border-bottom:1px solid var(--line);background:rgba(6,3,11,.5);overflow-x:auto}
+.tab{flex:0 0 auto;min-height:44px;padding:0 20px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--muted);font:600 15px/1 var(--display);cursor:pointer;transition:background .25s,color .25s,border-color .25s}
+.tab:hover{color:var(--text)}
+.tab[aria-selected=true]{background:rgba(192,64,208,.16);border-color:rgba(192,64,208,.4);color:#fff}
+.tabs .note{margin-left:auto;align-self:center;padding:0 12px;font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.simbody{display:grid;grid-template-columns:1.25fr 1fr;gap:0}
+.pane{padding:28px}
+.pane+.pane{border-left:1px solid var(--line)}
+.pane h3{font:500 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:16px}
+.blurb{color:var(--muted);font-size:15.5px;margin-bottom:22px}
+.rule{position:relative;border:1px solid var(--line);border-radius:14px;padding:16px 16px 16px 18px;margin-bottom:12px;background:rgba(6,3,11,.55);transition:border-color .4s,box-shadow .6s,background .4s}
+.rule code{display:block;font-size:14px;line-height:1.6;color:#E6DDF2;word-break:break-word}
+.rule code .w{color:var(--dim)}
+.rule code .a{color:var(--pink)}
+.rule .meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;white-space:nowrap;margin-top:10px;font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.rule.fired{border-color:rgba(126,226,184,.5);background:rgba(126,226,184,.06);box-shadow:0 0 0 1px rgba(126,226,184,.15),0 0 50px -12px rgba(126,226,184,.45)}
+.rule.fired .pill{color:var(--ok);border-color:rgba(126,226,184,.5)}
+.rule.off{opacity:.55}
+.events{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.ev{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:50px;padding:10px 16px;border-radius:14px;border:1px solid rgba(192,64,208,.45);background:linear-gradient(135deg,rgba(192,64,208,.22),rgba(139,92,246,.14));color:#fff;font:600 15px/1.3 var(--body);text-align:left;cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s,opacity .25s,border-color .25s}
+.ev:hover:not(:disabled){transform:translateX(4px);box-shadow:0 10px 30px -12px rgba(192,64,208,.8);border-color:var(--pink)}
+.ev:disabled{opacity:.38;cursor:not-allowed}
+.ev svg{flex:0 0 auto;width:18px;height:18px}
+.readout{display:grid;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(6,3,11,.55)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:13px 16px;font-size:15px}
+.row+.row{border-top:1px solid var(--line)}
+.row span{color:var(--muted)}
+.row b{font:500 14.5px/1.4 var(--mono);text-align:right;color:var(--text);transition:color .3s}
+.row.changed{animation:flash 1.6s var(--ease)}
+.row.changed b{color:var(--pink)}
+.row.locked b{color:var(--ok)}
+@keyframes flash{0%{background:rgba(192,64,208,.4)}100%{background:transparent}}
+.log{margin-top:18px;min-height:104px;border-radius:14px;border:1px dashed var(--line2);padding:14px 16px;font:400 13px/1.7 var(--mono);color:var(--muted)}
+.log .l{display:block;animation:in .5s var(--ease)}
+.log .l b{color:var(--ok);font-weight:500}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.reset{margin-top:14px;background:none;border:0;color:var(--muted);font:500 13px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px;padding:0 4px;text-decoration:underline;text-underline-offset:4px}
+.reset:hover{color:var(--text)}
+
+/* why (paper) */
+.life{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid var(--ink);counter-reset:n}
+.life div{padding:26px 22px 8px 0;position:relative;counter-increment:n}
+.life div::before{content:"0" counter(n);font:500 13px/1 var(--mono);letter-spacing:.14em;color:#9A2BB0;display:block;margin-bottom:16px}
+.life div::after{content:"";position:absolute;left:0;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.life h3{font-size:20px;margin-bottom:10px}
+.life p{color:var(--ink2);font-size:15.5px}
+.pull{margin-top:64px;font:600 clamp(24px,3.2vw,40px)/1.2 var(--display);letter-spacing:-.02em;max-width:22em}
+
+/* rules */
+.syntax{font:500 clamp(13px,1.5vw,17px)/1.7 var(--mono);padding:24px 26px;border-radius:18px;border:1px solid var(--line2);background:rgba(6,3,11,.6);margin-bottom:22px;overflow-x:auto;white-space:nowrap;color:#E6DDF2}
+.syntax .w{color:var(--dim)}.syntax .c{color:#B9A2F5}.syntax .a{color:var(--pink)}
+.tbl{border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tbl .r{display:grid;grid-template-columns:minmax(210px,.8fr) 1.6fr;gap:20px;padding:16px 22px;align-items:baseline}
+.tbl .r+.r{border-top:1px solid var(--line)}
+.tbl code{font-size:14px;color:var(--pink)}
+.tbl span{color:var(--muted);font-size:15.5px}
+.sub{font:600 22px/1.2 var(--display);margin:46px 0 18px}
+.callout{margin-top:26px;padding:22px 24px;border-radius:16px;border:1px solid rgba(192,64,208,.35);background:rgba(192,64,208,.08);font-size:17px}
+.callout b{color:#fff}
+
+/* limits */
+.limits .card{padding:34px 28px;background:linear-gradient(180deg,rgba(75,42,122,.26),rgba(12,6,22,.5));border-color:var(--line2)}
+.limits .n{font:300 64px/1 var(--display);letter-spacing:-.04em;margin-bottom:22px}
+.limits h3{font-size:23px}
+
+/* token */
+.token{display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;align-items:start}
+.tick{font:600 clamp(48px,7vw,92px)/1 var(--display);letter-spacing:-.03em;margin:14px 0 22px}
+.kv{border-top:1px solid var(--line);margin-top:26px}
+.kv div{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+.kv span{color:var(--muted)}.kv b{font:500 14.5px/1.5 var(--mono);text-align:right}
+.stack{display:grid;gap:14px}
+
+/* next (paper) */
+.road{list-style:none;margin:0;padding:0;counter-reset:s;max-width:860px}
+.road li{position:relative;padding:0 0 34px 76px;counter-increment:s}
+.road li::before{content:counter(s);position:absolute;left:0;top:-4px;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:600 18px/1 var(--display);background:var(--ink);color:var(--paper)}
+.road li::after{content:"";position:absolute;left:23px;top:50px;bottom:4px;width:2px;background:rgba(23,10,38,.18)}
+.road li:last-child::after{display:none}
+.road h3{font-size:22px;margin-bottom:8px}
+.road p{color:var(--ink2);font-size:16px;max-width:42em}
+
+/* straight talk + faq */
+.talk .card h3{font-size:18px}
+details{border-bottom:1px solid var(--line)}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 2px;font:600 18.5px/1.35 var(--display);min-height:44px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";flex:0 0 auto;font:300 28px/1 var(--display);color:var(--pink);transition:transform .3s var(--ease)}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--muted);padding:0 2px 24px;max-width:46em}
+.faq{max-width:880px}
+
+/* closing + footer */
+.close{text-align:center;padding:120px 0;overflow:hidden;isolation:isolate}
+.close::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(700px 420px at 50% 60%,rgba(192,64,208,.26),transparent 70%)}
+.close h2{font-size:clamp(38px,6vw,78px);font-weight:600;margin:18px 0 20px}
+.close p{color:var(--muted);max-width:34em;margin:0 auto 34px;font-size:18.5px}
+footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--muted);font-size:14.5px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:26px;align-items:flex-start}
+.foot nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+.foot nav a{text-decoration:none;padding:10px 0}
+.foot nav a:hover{color:var(--text)}
+.safe{margin-top:28px;padding-top:24px;border-top:1px solid var(--line);max-width:60em;color:var(--dim)}
+
+/* reveal */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+@media (max-width:980px){
+  .links,.nav .btn{display:none}
+  .burger{display:inline-flex}
+  .nav.open .links{display:flex;position:absolute;left:0;right:0;top:68px;flex-direction:column;gap:0;padding:10px 20px 20px;background:rgba(6,3,11,.97);border-bottom:1px solid var(--line)}
+  .nav.open .links a{padding:15px 0;border-bottom:1px solid var(--line);font-size:17px;color:var(--text)}
+  .hero{padding-top:118px}
+  .hero-grid{grid-template-columns:1fr;gap:10px}
+  .stage{max-width:400px;margin-top:26px}
+  .f1{left:0}.f2{right:0}
+  .facts{grid-template-columns:repeat(2,1fr)}
+  .simbody{grid-template-columns:1fr}
+  .pane+.pane{border-left:0;border-top:1px solid var(--line)}
+  .grid3,.grid4{grid-template-columns:repeat(2,1fr)}
+  .life{grid-template-columns:repeat(2,1fr);row-gap:26px}
+  .token{grid-template-columns:1fr}
+  section{padding:84px 0}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  .grid2,.grid3,.grid4,.facts,.life{grid-template-columns:1fr}
+  .life div{padding-right:0}
+  .tbl .r{grid-template-columns:1fr;gap:6px}
+  .pane{padding:20px}
+  .tabs .note{display:none}
+  .float{font-size:10.5px;padding:10px 11px}
+  .road li{padding-left:64px}
+  .cta .btn{flex:1 1 100%}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Dynamic Hooks, back to top"><img src="assets/icon-180.png" alt="" width="36" height="36">Dynamic Hooks</a>
+    <nav class="links" aria-label="Sections">
+      <a href="#react">See it react</a>
+      <a href="#rules">Programs</a>
+      <a href="#limits">Hard limits</a>
+      <a href="#token">$DHOOKS</a>
+      <a href="#next">What comes next</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">The programmable market layer / Robinhood Chain</span>
+        <h1><span class="l1">Markets that</span><span class="grad">react.</span></h1>
+        <p class="lede"><b>Launch a market. Program its economics. Let it evolve on-chain.</b> The rules are written at launch. The change happens later, automatically, when the condition is met and proven. The launcher does not hold a key to it. Neither do we.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#react">Watch a market react
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+        </div>
+        <div class="steps" aria-label="How it works in three steps"><span>Launch a market</span><i aria-hidden="true">→</i><span>Program its economics</span><i aria-hidden="true">→</i><span>Let it evolve on-chain</span></div>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <img src="assets/hook.jpg" alt="" width="1400" height="1222">
+        <div class="float f1"><b>Rule fired</b>when <span class="k">Verified(ownership)</span><br>then <span class="k">RouteToCreator</span></div>
+        <div class="float f2"><b>Armed</b>when <span class="k">State(liquidity ≥ L)</span><br>then <span class="k">SetFee(150)</span></div>
+      </div>
+    </div>
+    <div class="facts rv">
+      <div><strong>Fee never above 3%</strong><span>The hook refuses it at the engine level.</span></div>
+      <div><strong>Liquidity cannot leave</strong><span>The locking contract has no withdraw function.</span></div>
+      <div><strong>Escrow moves by claim only</strong><span>Never reachable by the launcher, the protocol, or any rule.</span></div>
+      <div><strong>Every program is public</strong><span>Each rule, its condition, whether it fired, and what it changed.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="react" class="alt">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">See it react</span>
+      <h2>Pick a template. Make something <span class="grad">happen.</span></h2>
+      <p>A template is a saved program with blanks. These are the first three, with their rules exactly as written in the docs. Press an event and watch the market's economics change.</p>
+    </div>
+    <div class="sim rv">
+      <div class="tabs" role="tablist" aria-label="Templates" id="tabs"></div>
+      <div class="simbody">
+        <div class="pane">
+          <p class="blurb" id="blurb"></p>
+          <h3>The program</h3>
+          <div id="rulesBox"></div>
+          <h3 style="margin-top:26px">Something happens</h3>
+          <div class="events" id="events"></div>
+        </div>
+        <div class="pane">
+          <h3>Economics now</h3>
+          <div class="readout" id="readout"></div>
+          <div class="log" id="log" aria-live="polite"></div>
+          <button class="reset" id="reset" type="button">Reset this market</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="paper" id="why">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Why rules should change</span>
+      <h2>A launch is a bet made in one transaction. A market has a <span class="grad">lifecycle.</span></h2>
+      <p>Every launchpad so far asks you to set the rules once and live with them. Today the moments below are handled off-chain, by multisig votes, by manual contract calls, or not at all. Dynamic Hooks moves them into the hook.</p>
+    </div>
+    <div class="life rv">
+      <div><h3>At launch</h3><p>Nobody is verified and nobody has liquidity. The right thing to do is protect the pool and the people who show up early.</p></div>
+      <div><h3>The creator proves who they are</h3><p>They should be paid directly, not through an escrow or a promise.</p></div>
+      <div><h3>The market gets deep</h3><p>The fee that made sense at ten ETH of liquidity is a tax at a thousand.</p></div>
+      <div><h3>The community hits something real</h3><p>A product shipped, a number reached, a vote passed. The economics should be allowed to reward it.</p></div>
+    </div>
+    <p class="pull rv">Programmable tokens put rules in the asset. Programmable markets put rules in the <span class="grad">venue.</span></p>
+  </div>
+</section>
+
+<section id="born">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">How a market is born</span>
+      <h2>Three things, one transaction.</h2>
+      <p>The launcher pays a small creation fee in ETH and signs once. No presale, no allocation to the launcher, and no way to seed the pool with less than the full supply.</p>
+    </div>
+    <div class="grid3">
+      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9 10h4.5a1.5 1.5 0 010 3H9.8"/></svg></div><h3>A token</h3><p>Fixed supply, minted once, no mint function, no owner. The default is 1,000,000,000 units.</p></div>
+      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5"/></svg></div><h3>A pool</h3><p>A Uniswap v4 pool against ETH, with the whole supply placed as a single-sided position and locked in a contract that has no withdraw function.</p></div>
+      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h11M8 12h11M8 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg></div><h3>A program</h3><p>The list of rules that govern the market's economics, chosen from a template and filled in by the launcher.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="rules" class="alt">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Programs and rules</span>
+      <h2>A program is an ordered list of <span class="grad">rules.</span></h2>
+      <p>The hook reads the market's economics on every swap: the fee rate, the routing table, the liquidity mode, the rewards switch. Rules change those values. Nothing else can.</p>
+    </div>
+    <div class="syntax rv"><span class="w">when</span> <span class="c">&lt;condition&gt;</span> &nbsp;<span class="w">then</span> <span class="a">&lt;action&gt;</span> &nbsp; <span class="w">[once | repeatable]</span> &nbsp; <span class="w">[after &lt;rule&gt;]</span></div>
+
+    <h3 class="sub rv">What can fire a rule</h3>
+    <div class="grid4">
+      <div class="card rv"><span class="tag">Verified(event)</span><p>A signature from an allow-listed verifier, bound to this market, with a nonce and a deadline. The creator owns the handle; the team hit a public milestone.</p></div>
+      <div class="card rv"><span class="tag">State(metric op value)</span><p>Read from the chain at evaluation time. Liquidity ≥ 50 ETH; cumulative volume ≥ 1,000 ETH; 30 days since launch; holders ≥ 500.</p></div>
+      <div class="card rv"><span class="tag">Agent(key)</span><p>A call from an allow-listed agent address, and the rule's own State or Verified check still passing.</p></div>
+      <div class="card rv"><span class="tag">Vote(threshold)</span><p>An on-chain signal from holders of the market token. A later release.</p></div>
+    </div>
+    <div class="callout rv"><b>Agents execute; they do not decide.</b> An agent can make a true rule fire sooner. It cannot make a false rule fire at all.</div>
+
+    <h3 class="sub rv">What a rule may change</h3>
+    <div class="tbl rv">
+      <div class="r"><code>SetFee(bps)</code><span>0 to 300. Never above 3%.</span></div>
+      <div class="r"><code>SetRouting(recipients, shares)</code><span>Shares sum to the fee; recipients only from the market's declared set.</span></div>
+      <div class="r"><code>RouteToEscrow / RouteToCreator</code><span>The claim switch. The escrow is reachable only by its claim.</span></div>
+      <div class="r"><code>ActivateRewards / DeactivateRewards</code><span>Turns the holders' share on or off. Accrued balances are never clawed back.</span></div>
+      <div class="r"><code>SetLiquidityMode(mode)</code><span><code>locked</code> or <code>locked_plus_buyback</code>. Removal is not a mode.</span></div>
+      <div class="r"><code>ReleaseIncentive(amount, to)</code><span>From the market's pre-funded incentive vault only, capped per rule at creation.</span></div>
+    </div>
+    <div class="callout rv"><b>Anyone can call <code>evaluate</code>.</b> If the condition holds, the action is applied in that transaction and a <code>RuleFired</code> event is emitted. If it does not hold, the call reverts and nothing changes.</div>
+  </div>
+</section>
+
+<section id="limits" class="limits">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">What cannot change</span>
+      <h2>Three things no program can <span class="grad">do.</span></h2>
+      <p>They are not in any template, cannot be added by any program, and are not parameters. They are properties of the engine.</p>
+    </div>
+    <div class="grid3">
+      <div class="card rv"><div class="n silver">01</div><h3>Remove liquidity</h3><p>The locking contract has no such function. Not paused, not time-locked, not governed: absent.</p></div>
+      <div class="card rv"><div class="n silver">02</div><h3>Reach an escrow without its claim</h3><p>The escrow moves on a verified claim, or to the holders after the window. Nothing else.</p></div>
+      <div class="card rv"><div class="n silver">03</div><h3>Set a fee above 3%</h3><p>The hook refuses it at the engine level.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="paid" class="alt">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Who gets paid</span>
+      <h2>Every trade pays a fee, inside the <span class="grad">swap.</span></h2>
+      <p>The fee is taken on the quote side by the hook and distributed in the same transaction. A market declares its recipients at launch. A program can move shares between them. It cannot add a seventh.</p>
+    </div>
+    <div class="grid3">
+      <div class="card rv"><h3>Creator</h3><p>The person or team the market is about. Paid directly once verified; held in escrow until then.</p></div>
+      <div class="card rv"><h3>Launcher</h3><p>The wallet that created the market.</p></div>
+      <div class="card rv"><h3>Holders</h3><p>Everyone holding the market token, by balance and time, through the holders pool.</p></div>
+      <div class="card rv"><h3>Protocol</h3><p>Dynamic Hooks. Funds buybacks and operations; pays referral links from its own share.</p></div>
+      <div class="card rv"><h3>Referral</h3><p>The wallet whose link brought the trade, paid from the protocol share.</p></div>
+      <div class="card rv"><h3>Escrow</h3><p>The creator's share while unverified. Keyed to the creator's identity, not to any wallet.</p></div>
+    </div>
+    <div class="callout rv"><b>Quote in a stock.</b> Robinhood Chain carries Robinhood Stock Tokens. A market can use one as its quote asset instead of ETH, so a market about a company's founder pays its creator, its holders and its launcher in that stock on every trade. It ships after ETH-quoted markets.</div>
+  </div>
+</section>
+
+<section id="token">
+  <div class="wrap token">
+    <div class="rv">
+      <span class="eyebrow">The token</span>
+      <div class="tick silver">$DHOOKS</div>
+      <p style="color:var(--muted);font-size:18.5px">The protocol's token. You do not need it to launch, trade, hold, verify or evaluate anything. No rule in any template requires it.</p>
+      <div class="kv">
+        <div><span>Supply</span><b>1,000,000,000, fixed</b></div>
+        <div><span>Mint function</span><b>None</b></div>
+        <div><span>Chain</span><b>Robinhood Chain</b></div>
+        <div><span>Address</span><b><a href="https://dynamic-hooks.gitbook.io/docs/addresses" target="_blank" rel="noopener">Published on the Addresses page</a></b></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card rv"><h3>Buybacks</h3><p>A published share of the protocol's net fee income buys $DHOOKS on the open market and burns it. A contract does it; anyone can call it. It is how the protocol spends part of its revenue, not a floor under anything.</p></div>
+      <div class="card rv"><h3>Governance</h3><p>Holders decide which templates are added, which quote assets are allowed, which verifiers are on the list, and parameter changes within published bounds.</p></div>
+      <div class="card rv"><h3>Later, weight</h3><p>A future release lets $DHOOKS be staked to increase a wallet's weight in the holders pools of the markets it holds, up to a published cap.</p></div>
+      <div class="callout rv"><b>$DHOOKS comes first.</b> The token comes before the protocol so the build can be funded in the open. Until markets open, holding it is holding a position in the plan, and plans can fail.</div>
+    </div>
+  </div>
+</section>
+
+<section class="paper" id="next">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">What comes next</span>
+      <h2>An order, not a <span class="grad">calendar.</span></h2>
+      <p>Each step starts when the one before it has been checked. No step has a date, and none will be given one until it is done.</p>
+    </div>
+    <ol class="road">
+      <li class="rv"><h3>The document and the token</h3><p>The docs, this site, and $DHOOKS on Robinhood Chain.</p></li>
+      <li class="rv"><h3>The build</h3><p>The contracts tested against a copy of Robinhood Chain and on its public testnet. Review of the hook, the program registry, the escrow and the lock, with findings published. Deployment behind the launch pause, exercised with the team's own money on real markets.</p></li>
+      <li class="rv"><h3>Markets open</h3><p>ETH-quoted markets from the Person, Creator and Milestone templates. Rules, holders pools, referral links and the first verifier from the first market.</p></li>
+      <li class="rv"><h3>Quote in a stock</h3><p>The allowed list opens with the first Robinhood Stock Tokens.</p></li>
+      <li class="rv"><h3>Votes and weight</h3><p><code>Vote</code> as a condition. $DHOOKS staking for holders-pool weight, written up on its own and reviewed before it ships.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="talk" class="talk">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Straight talk</span>
+      <h2>Read this before anything <span class="grad">else.</span></h2>
+    </div>
+    <div class="grid3">
+      <div class="card rv"><h3>Markets can go to zero.</h3><p>The program changes economics; it does not create demand. Most markets anywhere end at zero.</p></div>
+      <div class="card rv"><h3>Rules are only as good as their conditions.</h3><p>A Verified rule trusts a verifier's signature. A State rule trusts the chain. If you would not trust us to sign, do not launch a market that depends on our signature.</p></div>
+      <div class="card rv"><h3>Verification is not endorsement.</h3><p>A creator proving a handle means the money goes to them. It does not mean they asked for the market, like it, or will ever acknowledge it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="alt">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Questions</span>
+      <h2>Short answers.</h2>
+    </div>
+    <div class="faq rv">
+      <details><summary>Who can fire a rule?</summary><p>Anyone. Calling evaluate on a rule whose condition holds applies the action in that transaction. If the condition does not hold, the call reverts and nothing changes. The protocol runs an agent that evaluates State rules; anyone else can run one too.</p></details>
+      <details><summary>Can the launcher change the rules after launch?</summary><p>No. The rule is written at launch. The change happens later, automatically, when the condition is met and proven. The launcher does not hold a key to it, and neither does the protocol.</p></details>
+      <details><summary>What can a verifier do, and not do?</summary><p>It can delay a true claim by refusing to sign. It cannot move funds, change economics directly, or sign for an event the program did not define. If a verifier goes dark, the allow-list is updated and the claim proceeds with another.</p></details>
+      <details><summary>What happens to the creator's share if they never show up?</summary><p>It accrues in an escrow keyed to the creator's identity. It moves in exactly two cases: the creator proves the identity and claims it, or the claim window passes and it is paid to the holders pool. It is never burned.</p></details>
+      <details><summary>Does the launcher get tokens at launch?</summary><p>No. The entire supply is placed as one single-sided position in the pool. The launcher puts in nothing but the creation fee, holds nothing at launch, and cannot have pre-bought. The first buyer pays the starting price.</p></details>
+      <details><summary>Do I need $DHOOKS to use the protocol?</summary><p>No. You do not need it to launch, trade, hold, verify or evaluate anything.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="close">
+  <div class="wrap rv">
+    <span class="eyebrow">The full document</span>
+    <h2>Rules belong in the <span class="grad">venue.</span></h2>
+    <p>The docs explain what a market is here, how its program works, who gets paid, and what can and cannot change.</p>
+    <a class="btn btn-primary" href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Read the docs</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <a class="brand" href="#top"><img src="assets/icon-180.png" alt="" width="36" height="36" loading="lazy">Dynamic Hooks</a>
+      <nav aria-label="Footer">
+        <a href="https://dynamic-hooks.gitbook.io/docs/" target="_blank" rel="noopener">Docs</a>
+        <a href="https://dynamic-hooks.gitbook.io/docs/programs-and-rules" target="_blank" rel="noopener">Programs and rules</a>
+        <a href="https://dynamic-hooks.gitbook.io/docs/straight-talk" target="_blank" rel="noopener">Straight talk</a>
+        <a href="https://dynamic-hooks.gitbook.io/docs/addresses" target="_blank" rel="noopener">Addresses</a>
+        <a href="#" data-x-link hidden>X</a>
+      </nav>
+    </div>
+    <p class="safe">No one from this project will ever message you first, ask for a seed phrase, or send a claim link. The only addresses that matter are on the Addresses page of the docs.</p>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+
+// menu
+const nav = document.getElementById('nav'), burger = document.getElementById('burger');
+burger.addEventListener('click', () => { const o = nav.classList.toggle('open'); burger.setAttribute('aria-expanded', o); burger.setAttribute('aria-label', o ? 'Close menu' : 'Open menu'); });
+nav.querySelectorAll('.links a').forEach(a => a.addEventListener('click', () => { nav.classList.remove('open'); burger.setAttribute('aria-expanded', false); }));
+
+// reveal on scroll
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' }) : null;
+document.querySelectorAll('.rv').forEach((el, i) => { if (!io) return el.classList.add('in'); el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
+
+// simulator: the three templates, rules as written in the docs
+const TEMPLATES = {
+  person: {
+    name: 'Person',
+    blurb: 'A market about a person with a handle. Fee 3%. Until the creator verifies, their share waits in escrow.',
+    rules: [
+      { when: 'Verified(ownership)', then: 'RouteToCreator' },
+      { when: 'State(days_since_launch ≥ 90) and not claimed', then: 'SweepEscrowToHolders' },
+    ],
+    fields: [['Fee on every trade', '3.00%'], ['Creator', '2.00% → escrow'], ['Launcher', '0'], ['Holders', '0.50%'], ['Protocol', '0.50%'], ['Escrow', 'Accruing for the creator'], ['Liquidity', 'Locked', 'locked']],
+    events: [
+      { label: 'The creator proves the handle', rule: 0, set: { Creator: '1.50% → paid direct', Launcher: '0.50%', Escrow: 'Claimed by the creator' }, kills: [1] },
+      { label: '90 days pass, unclaimed', rule: 1, set: { Escrow: 'Swept to the holders pool' } },
+    ],
+  },
+  creator: {
+    name: 'Creator',
+    blurb: 'A market launched by its own creator, verified at launch. L and V are thresholds the launcher fills in.',
+    rules: [
+      { when: 'State(liquidity ≥ L)', then: 'SetFee(150)' },
+      { when: 'State(volume ≥ V)', then: 'ActivateRewards' },
+    ],
+    fields: [['Fee on every trade', '3.00%'], ['Holders rewards', 'Off'], ['Liquidity', 'Locked', 'locked']],
+    events: [
+      { label: 'Liquidity reaches L', rule: 0, set: { 'Fee on every trade': '1.50%' } },
+      { label: 'Volume reaches V', rule: 1, set: { 'Holders rewards': 'On' } },
+    ],
+  },
+  milestone: {
+    name: 'Milestone',
+    blurb: 'A team market with rewards off until something real happens. The second rule can only fire after the first.',
+    rules: [
+      { when: 'Verified(milestone)', then: 'ActivateRewards' },
+      { when: 'Verified(milestone)', then: 'ReleaseIncentive(A, holders)', after: 0 },
+    ],
+    fields: [['Holders rewards', 'Off'], ['Incentive vault', 'A, funded at launch'], ['Liquidity', 'Locked', 'locked']],
+    events: [
+      { label: 'The verifier attests the milestone', rule: 0, set: { 'Holders rewards': 'On' } },
+      { label: 'Anyone calls evaluate on rule 2', rule: 1, needs: 0, set: { 'Incentive vault': 'Released to holders' } },
+    ],
+  },
+};
+const $ = id => document.getElementById(id);
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+let cur = 'person', st;
+
+function fresh() { const t = TEMPLATES[cur]; st = { fired: new Set(), dead: new Set(), vals: Object.fromEntries(t.fields.map(f => [f[0], f[1]])), changed: new Set(), log: [] }; }
+function draw() {
+  const t = TEMPLATES[cur];
+  $('tabs').innerHTML = Object.entries(TEMPLATES).map(([k, v]) => `<button class="tab" role="tab" aria-selected="${k === cur}" data-t="${k}">${v.name}</button>`).join('') + '<span class="note">Simulation, illustrative</span>';
+  $('blurb').textContent = t.blurb;
+  $('rulesBox').innerHTML = t.rules.map((r, i) => {
+    const fired = st.fired.has(i), dead = st.dead.has(i), waits = r.after !== undefined && !st.fired.has(r.after) && !fired;
+    const status = fired ? 'Fired' : dead ? 'Cannot fire: claimed' : waits ? `Waits for rule ${r.after + 1}` : 'Armed';
+    return `<div class="rule${fired ? ' fired' : ''}${dead ? ' off' : ''}"><code><span class="w">when</span> ${r.when} <span class="w">then</span> <span class="a">${r.then}</span></code><div class="meta"><span>Rule ${i + 1}</span><span>once</span><span class="pill">${status}</span></div></div>`;
+  }).join('');
+  $('events').innerHTML = t.events.map((e, i) => {
+    const off = st.fired.has(e.rule) || st.dead.has(e.rule) || (e.needs !== undefined && !st.fired.has(e.needs));
+    return `<button class="ev" type="button" data-e="${i}"${off ? ' disabled' : ''}><span>${e.label}</span>${arrow}</button>`;
+  }).join('');
+  $('readout').innerHTML = t.fields.map(f => `<div class="row${st.changed.has(f[0]) ? ' changed' : ''}${f[2] ? ' ' + f[2] : ''}"><span>${f[0]}</span><b>${st.vals[f[0]]}</b></div>`).join('');
+  $('log').innerHTML = st.log.length ? st.log.map(l => `<span class="l">${l}</span>`).join('') : 'No rule has fired yet. Press an event on the left.';
+}
+function fire(i) {
+  const t = TEMPLATES[cur], e = t.events[i];
+  st.fired.add(e.rule); (e.kills || []).forEach(k => st.dead.add(k));
+  st.changed = new Set(Object.keys(e.set)); Object.assign(st.vals, e.set);
+  st.log.push(`<b>RuleFired</b> · rule ${e.rule + 1} · ${t.rules[e.rule].then}`);
+  draw();
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; cur = b.dataset.t; fresh(); draw(); });
+$('events').addEventListener('click', e => { const b = e.target.closest('[data-e]'); if (b && !b.disabled) fire(+b.dataset.e); });
+$('reset').addEventListener('click', () => { fresh(); draw(); });
+fresh(); draw();
+</script>
+</body>
+</html>
